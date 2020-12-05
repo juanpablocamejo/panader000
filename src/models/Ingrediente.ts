@@ -6,7 +6,7 @@ export class Ingrediente<T extends TipoIngrediente> {
   private readonly receta: Receta;
   public proporcion: Decimal = new Decimal(0);
   public tipo: T;
-  public cantidad: Decimal;
+  public cantidad: Decimal = new Decimal(0);
 
   constructor(receta: Receta, tipo: T, proporcion: Decimal) {
     this.receta = receta;
@@ -14,11 +14,16 @@ export class Ingrediente<T extends TipoIngrediente> {
     this.proporcion = proporcion;
   }
 
-  public proporcionReal() {
-    return this.proporcion.div(this.receta.sumaDeProporciones()).mul(100);
+  public fijarCantidad(cantidad:Decimal) {
+    this.receta.fijarCantidadIngrediente(this,cantidad);
   }
 
-  public fijarCantidad(cantidad: Decimal) {
-    this.receta.cantidadTotal = cantidad.mul(100).div(this.proporcionReal());
+  public fijarProporcion(proporcion:Decimal){
+    this.proporcion = proporcion;
+    this.receta.calcularCantidades();
+  }
+
+  public get proporcionReal(): Decimal {
+    return this.proporcion.div(this.receta.sumaDeProporciones()).mul(100);
   }
 }

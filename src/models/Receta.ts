@@ -5,37 +5,35 @@ import { Harina, OtroIngrediente, TipoIngrediente } from "./TipoIngrediente";
 const cero = new Decimal(0);
 
 export class Receta extends TipoIngrediente {
-  public _cantidadTotal: Decimal = new Decimal(1000);
+  public cantidadTotal: Decimal = new Decimal(1000);
   private _harinas: Ingrediente<Harina>[] = [];
-  private _prefermentos: Ingrediente<Receta>[] = [];
+  private _preparaciones: Ingrediente<Receta>[] = [];
   private _ingredientes: Ingrediente<OtroIngrediente>[] = [];
 
   constructor(params?: Partial<Receta>) {
     super(params && (params as Partial<TipoIngrediente>));
   }
-  get cantidadTotal(): Decimal {
-    return this._cantidadTotal;
+
+  public get harinas() {
+    return this._harinas;
+  }
+  public get preparaciones() {
+    return this._preparaciones;
+  }
+  public get ingredientes() {
+    return this._ingredientes;
   }
 
-  set cantidadTotal(valor: Decimal) {
-    this._cantidadTotal = valor;
-    this.calcularCantidades();
-  }
-
-  public readonly harinas = () => this._harinas;
-  public readonly prefermentos = () => this._prefermentos;
-  public readonly ingredientes = () => this._ingredientes;
-
-  public porcentajeCargaHarinas(): Decimal {
+  public get porcentajeCargaHarinas(): Decimal {
     return this._harinas.reduce(
       (sum, x) => sum.plus(x.proporcion || cero),
       cero
     );
   }
-  public porcentajeHidratacion(): Decimal {
-    return this._prefermentos
+  public get porcentajeHidratacion(): Decimal {
+    return this._preparaciones
       .reduce(
-        (sum, p) => p.tipo.porcentajeHidratacion().mul(p.proporcion.div(100)),
+        (sum, p) => p.tipo.porcentajeHidratacion.mul(p.proporcion.div(100)),
         cero
       )
       .plus(
@@ -48,7 +46,6 @@ export class Receta extends TipoIngrediente {
 
   public agregarHarina(harina: Harina, proporcion: Decimal): Receta {
     this._harinas = this.agregar(this._harinas, harina, proporcion);
-    this.calcularCantidades();
     return this;
   }
 
@@ -61,7 +58,6 @@ export class Receta extends TipoIngrediente {
       ingrediente,
       proporcion
     );
-    this.calcularCantidades();
     return this;
   }
 
@@ -69,12 +65,11 @@ export class Receta extends TipoIngrediente {
     prefermento: Prefermento,
     proporcion: Decimal
   ): Receta {
-    this._prefermentos = this.agregar(
-      this._prefermentos,
+    this._preparaciones = this.agregar(
+      this._preparaciones,
       prefermento,
       proporcion
     );
-    this.calcularCantidades();
     return this;
   }
 
@@ -89,7 +84,7 @@ export class Receta extends TipoIngrediente {
   }
 
   public eliminarPrefermento(item: Ingrediente<Prefermento>): Receta {
-    this._prefermentos = this.eliminar(item, this._prefermentos);
+    this._preparaciones = this.eliminar(item, this._preparaciones);
     return this;
   }
 
@@ -98,7 +93,7 @@ export class Receta extends TipoIngrediente {
     TipoIngrediente: T,
     proporcion: Decimal
   ): Ingrediente<T>[] {
-    return [new Ingrediente<T>(this, TipoIngrediente, proporcion), ...lista];
+    return [...lista, new Ingrediente<T>(this, TipoIngrediente, proporcion)];
   }
 
   public eliminar<T extends TipoIngrediente>(
@@ -108,27 +103,47 @@ export class Receta extends TipoIngrediente {
     return lista.filter((i) => i === ingrediente);
   }
 
+  public calcularCantidadIngrediente(
+    ingrediente: Ingrediente<TipoIngrediente>
+  ) {
+    return this.calcularCantidadHarina().mul(ingrediente.proporcion.div(100));
+  }
+
+  public fijarCantidadTotal(cant:Decimal){
+    this.cantidadTotal = cant;
+    this.calcularCantidades();
+    return this;
+  }
+  public fijarCantidadIngrediente(ingrediente: Ingrediente<TipoIngrediente>, cantidad?:Decimal) {
+    if (cantidad) ingrediente.cantidad = cantidad;
+    this.cantidadTotal = ingrediente.cantidad
+      .mul(100)
+      .div(ingrediente.proporcionReal)
+      .toDP(2);
+
+    this.calcularCantidades();
+    return this;
+  }
+
   public calcularCantidades() {
     const cantidadHarina = this.calcularCantidadHarina();
-    this.calcularCantidadesLista(cantidadHarina, this.harinas());
-    this.calcularCantidadesLista(cantidadHarina, this.prefermentos());
-    this.calcularCantidadesLista(cantidadHarina, this.ingredientes());
+    this.calcularCantidadesLista(cantidadHarina, this.harinas);
+    this.calcularCantidadesLista(cantidadHarina, this.preparaciones);
+    this.calcularCantidadesLista(cantidadHarina, this.ingredientes);
   }
 
-  private listaIngredientes() {
-    return [...this.harinas(), ...this.prefermentos(), ...this.ingredientes()];
+  public get listaIngredientes(): Ingrediente<TipoIngrediente>[] {
+    return [...this.harinas, ...this.preparaciones, ...this.ingredientes];
   }
 
-  public sumaDeProporciones(){
-     return this.listaIngredientes()
-        .map((i) => i.proporcion)
-        .reduce((sum,i)=>sum.plus(i), new Decimal(0))
+  public sumaDeProporciones() {
+    return this.listaIngredientes
+      .map((i) => i.proporcion)
+      .reduce((sum, i) => sum.plus(i), new Decimal(0));
   }
 
   private calcularCantidadHarina() {
-    return this._cantidadTotal.div(
-      this.sumaDeProporciones().div(100)
-    );
+    return this.cantidadTotal.div(this.sumaDeProporciones().div(100));
   }
 
   private calcularCantidadesLista(
@@ -136,7 +151,14 @@ export class Receta extends TipoIngrediente {
     coleccion: Ingrediente<TipoIngrediente>[]
   ) {
     coleccion.forEach((i) => {
-      i.cantidad = cantidadHarina.mul(i.proporcion.div(new Decimal(100)));
+      const newVal = cantidadHarina
+        .mul(i.proporcion.div(new Decimal(100)))
+        .toDP(2);
+      if (!i.cantidad.toDP(2).equals(newVal)) i.cantidad = newVal;
     });
+  }
+  public get lista():string[]{
+    const ing = this.listaIngredientes.map(i=>[i.tipo.nombre,i.proporcion.toFixed(2), i.cantidad.toFixed(2)].join(' '));
+    return [`Peso Total: ${this.cantidadTotal}`,`Hidratación: ${this.porcentajeHidratacion}`,...ing]
   }
 }

@@ -5,10 +5,10 @@
   "exclude": ["node_modules/*", "__sapper__/*", "public/*","**/*.spec.ts"],
   "compilerOptions": {
     "baseUrl": "src",
-    "paths": {
-      "theme":["theme"]
+    "paths":{
+      "svelte-materialify/src": ["svelte-materialify/src/**/*"]
     },
-    "types": ["jest","svelte"]
+    "types": ["jest","svelte","svelte-materialify" ]
      ,"isolatedModules": false
   }
 }

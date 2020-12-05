@@ -1,10 +1,13 @@
 <script lang="ts">
 import Receta  from "./components/Receta.svelte";
-import { Button, Col, Row } from 'sveltestrap';
-
+import {MaterialApp} from 'svelte-materialify';
+let theme: any = 'light';
 </script>
 
 <div class="App">
-    <h2>Panader000</h2>
-     <!-- <Receta/> -->
+    <MaterialApp {theme}>
+        <h2>Panader000</h2>
+        <Receta/>
+    </MaterialApp>
 </div>
+
