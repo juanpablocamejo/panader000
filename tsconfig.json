@@ -5,10 +5,9 @@
   "exclude": ["node_modules/*", "__sapper__/*", "public/*","**/*.spec.ts"],
   "compilerOptions": {
     "baseUrl": "src",
-    "paths":{
-      "svelte-materialify/src": ["svelte-materialify/src/**/*"]
-    },
-    "types": ["jest","svelte","svelte-materialify" ]
+    "allowJs": true,
+    "typeRoots": ["src/types"],
+    "types": ["jest","svelte","svelte-materialify","firebase"]
      ,"isolatedModules": false
   }
 }

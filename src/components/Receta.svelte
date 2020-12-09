@@ -13,7 +13,7 @@
     tiposPrefermentos,
   } from "../models/Store";
   import { Prefermento } from "../models/Prefermento";
-  import { Row, Col, Container, Select } from "svelte-materialify/src";
+  import { Row, Col, Container, Select, Footer } from "svelte-materialify/src";
   import { Decimal } from "decimal.js";
   import { Button } from "svelte-materialify";
 
@@ -63,6 +63,8 @@
   });
 
   const getTipo = (nombre) => items.find((i) => i.nombre == nombre);
+
+  receta = receta.calcularCantidades();
 </script>
 
 <Container>
@@ -78,6 +80,8 @@
           }} />
       </label>
     </Col>
+  <Col>% Hidratación: {receta.porcentajeHidratacion}%</Col>
+  <Col>% Harinas: {receta.porcentajeCargaHarinas}%</Col>
   </Row>
   <Row>
     <Col>Ingrediente</Col>
@@ -109,22 +113,26 @@
       valor={ingredientes}
       deshabilitarCarga={false} />
   {/if}
-  <Row>
-    <Col>
-      <select bind:value={selected} on:change={console.log}>
-        {#each items as item}
-          <option value={item.value}>{item.name}</option>
-        {/each}
-      </select>
-    </Col>
 
-    <Col>
-      <Button
-        on:click={() => {
-          receta = receta.agregarIngrediente(selected, new Decimal(0));
-        }}>
-        Agregar
-      </Button>
-    </Col>
-  </Row>
 </Container>
+<div style="height: 200px;position:relative;">
+  <Footer class="justify-center pa-2" absolute>
+    <Row>
+      <Col>
+        <Select value={selected} {items} format={(i)=>i.nombre}>
+  
+        </Select>
+      </Col>
+  
+      <Col>
+        <Button
+          on:click={() => {
+            console.log(selected)
+            receta = receta.agregarIngrediente(selected, new Decimal(0));
+          }}>
+          Agregar
+        </Button>
+      </Col>
+    </Row>
+  </Footer>
+</div>

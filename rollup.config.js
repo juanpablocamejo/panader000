@@ -6,6 +6,7 @@ import { terser } from "rollup-plugin-terser";
 import typescript from "@rollup/plugin-typescript";
 import scss from "rollup-plugin-scss";
 import babel from "rollup-plugin-babel";
+
 const { preprocess } = require("./svelte.config");
 
 const production = !process.env.ROLLUP_WATCH;
@@ -63,9 +64,11 @@ export default {
     // some cases you'll need additional configuration -
     // consult the documentation for details:
     // https://github.com/rollup/plugins/tree/master/packages/commonjs
+
     resolve({
       browser: true,
       dedupe: ["svelte"],
+      mainFields: ["main", "module"],
     }),
     commonjs(),
     typescript({
@@ -75,7 +78,9 @@ export default {
 
     // In dev mode, call `npm run start` once
     // the bundle has been generated
-    !production && serve(),
+    !production && serve({
+
+    }),
 
     // Watch the `public` directory and refresh the
     // browser on changes when not in production

@@ -130,6 +130,7 @@ export class Receta extends TipoIngrediente {
     this.calcularCantidadesLista(cantidadHarina, this.harinas);
     this.calcularCantidadesLista(cantidadHarina, this.preparaciones);
     this.calcularCantidadesLista(cantidadHarina, this.ingredientes);
+    return this;
   }
 
   public get listaIngredientes(): Ingrediente<TipoIngrediente>[] {

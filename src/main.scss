@@ -1,2 +1,14 @@
-// @import "../node_modules/@mdi/font/css/materialdesignicons.min";
-// @import "../node_modules/@mdi/font/scss/materialdesignicons.scss";
+
+/* MaterialDesignIcons.com */
+@font-face {
+	font-family: "Material Design Icons";
+	src: url("./fonts/materialdesignicons-webfont.eot");
+	src: url("./fonts/materialdesignicons-webfont.eot") format("embedded-opentype"), url("./fonts/materialdesignicons-webfont.woff2") format("woff2"), url("./fonts/materialdesignicons-webfont.woff") format("woff"), url("./fonts/materialdesignicons-webfont.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+  }
+ @import "../node_modules/@mdi/font/css/materialdesignicons.min";
+
+ body h6{
+	 font-family: Material Design Icons;
+ }
