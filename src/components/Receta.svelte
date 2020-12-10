@@ -8,6 +8,7 @@
     TipoIngrediente,
   } from "../models/TipoIngrediente";
   import {
+    FirebaseStore,
     tiposHarinas,
     tiposIngredientes,
     tiposPrefermentos,
@@ -16,7 +17,14 @@
   import { Row, Col, Container, Select, Footer } from "svelte-materialify/src";
   import { Decimal } from "decimal.js";
   import { Button } from "svelte-materialify";
-
+  import { Collection } from "sveltefire";
+  import { derived } from "svelte/store";
+  import { selectStore } from "../utils";
+  let data = [];
+  const tipos = selectStore(
+    new FirebaseStore(TipoIngrediente, "tiposIngredientes"),
+    "nombre"
+  );
   let receta = new Receta();
   let harinas: Ingrediente<Harina>[] = [];
   let ingredientes: Ingrediente<OtroIngrediente>[] = [];
@@ -59,7 +67,7 @@
   let items = [];
 
   tiposIngredientes.subscribe((val) => {
-    items = val.map((ti, idx) => ({ name: ti.nombre, value: ti }));
+    items = val.map((ti) => ({ name: ti.nombre, value: ti, ...ti }));
   });
 
   const getTipo = (nombre) => items.find((i) => i.nombre == nombre);
@@ -80,8 +88,8 @@
           }} />
       </label>
     </Col>
-  <Col>% Hidratación: {receta.porcentajeHidratacion}%</Col>
-  <Col>% Harinas: {receta.porcentajeCargaHarinas}%</Col>
+    <Col>% Hidratación: {receta.porcentajeHidratacion}%</Col>
+    <Col>% Harinas: {receta.porcentajeCargaHarinas}%</Col>
   </Row>
   <Row>
     <Col>Ingrediente</Col>
@@ -113,21 +121,17 @@
       valor={ingredientes}
       deshabilitarCarga={false} />
   {/if}
-
 </Container>
 <div style="height: 200px;position:relative;">
   <Footer class="justify-center pa-2" absolute>
     <Row>
       <Col>
-        <Select value={selected} {items} format={(i)=>i.nombre}>
-  
-        </Select>
+        <Select bind:value={selected} items={$tipos} format={(i) => i.nombre} />
       </Col>
-  
+
       <Col>
         <Button
           on:click={() => {
-            console.log(selected)
             receta = receta.agregarIngrediente(selected, new Decimal(0));
           }}>
           Agregar

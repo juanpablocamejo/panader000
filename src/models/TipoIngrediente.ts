@@ -1,6 +1,6 @@
 import { Decimal } from "decimal.js";
 
-export abstract class TipoIngrediente {
+export class TipoIngrediente {
   public readonly nombre: string;
   public readonly esLiquido: boolean = false;
   public proporcionDefault: Decimal = new Decimal(0);

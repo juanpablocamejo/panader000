@@ -18,18 +18,20 @@
   const authProvider = new firebase.auth.GoogleAuthProvider();
 
   export let url = ""; //This property is necessary declare to avoid ignore the Router
-  import Header from "./components/Header.svelte"
+  import Header from "./components/Header.svelte";
+  import { Collection } from "sveltefire";
 </script>
 
 <div class="App">
-  <h6>asdf</h6>
-  <FirebaseApp {firebase}>      
-      <User let:user let:auth>
-                  <div slot="signed-out">
-                    <Button on:click={() => auth.signInWithPopup(authProvider)}>Acceder
-                      con google</Button>
-                  </div>
-                  <Header></Header>
+  <FirebaseApp {firebase}>
+
+    <User let:user let:auth>
+      <div slot="signed-out">
+        <Button on:click={() => auth.signInWithRedirect(authProvider)}>
+          Acceder con google
+        </Button>
+      </div>
+      <Header />
       <Router {url}>
         <Route path="/">
           <Home />
