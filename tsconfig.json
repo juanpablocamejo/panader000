@@ -6,8 +6,7 @@
   "compilerOptions": {
     "baseUrl": "src",
     "allowJs": true,
-    "typeRoots": ["src/types"],
-    "types": ["jest","svelte","svelte-materialify","firebase"]
+    "types": ["jest","svelte","svelte-materialify","firebase","src/types"]
      ,"isolatedModules": false
   }
 }

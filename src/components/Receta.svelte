@@ -13,14 +13,11 @@
     tiposIngredientes,
     tiposPrefermentos,
   } from "../models/Store";
-  import { Prefermento } from "../models/Prefermento";
-  import { Row, Col, Container, Select, Footer } from "svelte-materialify/src";
+  import { Row, Col, Container, Select, Footer, ProgressLinear } from "svelte-materialify/src";
   import { Decimal } from "decimal.js";
   import { Button } from "svelte-materialify";
-  import { Collection } from "sveltefire";
-  import { derived } from "svelte/store";
   import { selectStore } from "../utils";
-  let data = [];
+  
   const tipos = selectStore(
     new FirebaseStore(TipoIngrediente, "tiposIngredientes"),
     "nombre"
@@ -31,22 +28,23 @@
   let prefermentos: Ingrediente<TipoIngrediente>[] = [];
   let harinasCompleto = false;
   $: harinas = receta.harinas;
-  $: ingredientes = receta.ingredientes;
+  $: ingredientes = receta.otrosIngredientes;
   $: prefermentos = receta.preparaciones;
-  $: cantHarinas = harinas.reduce((sum, x) => +sum + +x.proporcion, 0);
   $: harinasCompleto = receta.porcentajeCargaHarinas.equals(100);
   $: cantidadTotal = receta.cantidadTotal;
   $: receta = receta;
-  const harina000 = new Harina("Harina 000");
-  const harina0000 = new Harina("Harina 0000");
-  const agua = new OtroIngrediente("agua", true);
-  const levadura = new OtroIngrediente("levadura", false);
-  const esponja = new Prefermento({ nombre: "Esponja" });
-  esponja.agregarHarina(harina000, new Decimal(80));
-  esponja.agregarIngrediente(agua, new Decimal(60));
-  esponja.agregarIngrediente(levadura, new Decimal(5));
-  receta.agregarHarina(harina000, new Decimal(80));
-  receta.agregarHarina(harina0000, new Decimal(20));
+  $: porcentajeHarinas = receta.porcentajeCargaHarinas;
+  const harina000 = new Harina({nombre:"Harina 000"});
+  const harina0000 = new Harina({nombre:"Harina 0000"});
+  const agua = new OtroIngrediente({nombre:"agua", esLiquido:true});
+  const levadura = new OtroIngrediente({nombre:"levadura", esLiquido:false});
+  const esponja = new Receta({ nombre: "Esponja" });
+  esponja.agregar(harina000, new Decimal(80));
+  esponja.agregar(agua, new Decimal(60));
+  esponja.agregar(levadura, new Decimal(5));
+  receta.agregar(harina000, new Decimal(80));
+  receta.agregar(harina0000, new Decimal(20));
+
   function agregarTipoHarina(evt: CustomEvent) {
     console.log("agregar tipo de harina", evt);
     // app.AgregarTipo(StoreTypes.TipoHarina,evt.detail);
@@ -71,7 +69,8 @@
   });
 
   const getTipo = (nombre) => items.find((i) => i.nombre == nombre);
-
+  let _val = 0
+$: val = _val;
   receta = receta.calcularCantidades();
 </script>
 
@@ -89,7 +88,11 @@
       </label>
     </Col>
     <Col>% Hidratación: {receta.porcentajeHidratacion}%</Col>
-    <Col>% Harinas: {receta.porcentajeCargaHarinas}%</Col>
+    <Col>% Harinas: {porcentajeHarinas}%
+
+      <ProgressLinear  value={val} />
+      <button on:click={()=>_val=_val+1}>{val}</button>
+</Col>
   </Row>
   <Row>
     <Col>Ingrediente</Col>
@@ -126,13 +129,14 @@
   <Footer class="justify-center pa-2" absolute>
     <Row>
       <Col>
-        <Select bind:value={selected} items={$tipos} format={(i) => i.nombre} />
+        <Select dense bind:value={selected} items={$tipos} format={(i) => i.nombre} />
       </Col>
 
       <Col>
         <Button
           on:click={() => {
-            receta = receta.agregarIngrediente(selected, new Decimal(0));
+            const tipo = selected.esHarina ? new OtroIngrediente(selected) : new Harina(selected);
+            receta = receta.agregar(tipo, new Decimal(0));
           }}>
           Agregar
         </Button>

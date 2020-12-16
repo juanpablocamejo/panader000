@@ -41,14 +41,14 @@
 </script>
 
 <Row>
-  <Col>{valor.tipo.nombre}</Col>
-  <Col>    <TextField type="number"
+  <Col>{valor.nombre}</Col>
+  <Col>    <TextField type="number" dense
     {...defaultProps}
     class="inactive"
     value={proporcion}
     on:change={cambiarProporcion} /></Col>
   <Col>
-    <TextField  type="number"
+    <TextField  type="number" dense
       {...defaultProps}
       class="inactive"
       value={cantidad}

@@ -1,20 +1,19 @@
 import { writable, derived, Writable, Readable } from "svelte/store";
-import { Prefermento } from "./Prefermento";
-import type { Receta } from "./Receta";
+import { Receta } from "./Receta";
 import { Harina, OtroIngrediente, TipoIngrediente } from "./TipoIngrediente";
 import { collectionStore } from "sveltefire";
 import type firebase from "firebase/app";
 
 export const tiposRecetas = writable<Receta[]>([]);
-export const tiposPrefermentos = writable<Prefermento[]>([
-  new Prefermento({ nombre: "Poolish" }),
+export const tiposPrefermentos = writable<Receta[]>([
+  new Receta({ nombre: "Poolish" }),
 ]);
 export const tiposHarinas = writable<Harina[]>(
   [
     "Harina de trigo (000)",
     "Harina de trigo (0000)",
     "Harina de trigo (Integral)",
-  ].map((nombre) => new Harina(nombre))
+  ].map((nombre) => new Harina({nombre}))
 );
 export const tiposIngredientes = writable<OtroIngrediente[]>(
   [
@@ -23,7 +22,7 @@ export const tiposIngredientes = writable<OtroIngrediente[]>(
     { nombre: "Manteca", esLiquido: false },
     { nombre: "Sal", esLiquido: false },
     { nombre: "Azucar", esLiquido: false },
-  ].map((obj) => new OtroIngrediente(obj.nombre, obj.esLiquido))
+  ].map((obj) => new OtroIngrediente({nombre:obj.nombre, esLiquido:obj.esLiquido}))
 );
 
 export class FirebaseStore<T> implements Readable<T[]> {
